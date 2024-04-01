@@ -18,48 +18,70 @@ class ClusterBasedVehicleRouting:
         self.depot_latitude = depot_latitude
         self.depot_longitude = depot_longitude
         self.file_name = file_name
-        self.df = None
+        self.df = pd.read_csv(self.file_name)
         self.cluster_df = None
         self.cost = None
         self.routes = {}
         self.distances = {}
         self.result_status = None
 
-    def load_and_prepare_data(self):
-        self.df = pd.read_csv(self.file_name)
-        self.df['demand'] = 1
-        print(self.df)
-
     def perform_clustering(self):
         X = self.df[['longitude', 'latitude']]
         kmeans = KMeans(n_clusters=self.n_clusters, random_state=0).fit(X)
         self.df['Cluster'] = kmeans.labels_
-        print(self.df)
 
     def prepare_depot(self):
         new_row = pd.DataFrame({
             'latitude': [self.depot_latitude],
             'longitude': [self.depot_longitude],
             'demand': [0],
-            'GroupID': [-1],
-            'NearestCenterName': ['Depot'],
             'Cluster': [-1]
         })
         self.df = pd.concat([new_row, self.df]).reset_index(drop=True)
-        print(self.df)
+        self.df.to_csv('depo_cluster_df.csv',index=False)
+
+        # 地図の中心をデポとする
+        map_center = [self.depot_latitude, self.depot_longitude]
+        m = folium.Map(location=map_center, zoom_start=13)
+
+        # デポを特別なアイコンで地図上に追加
+        folium.Marker(
+            location=[self.depot_latitude, self.depot_longitude],
+            popup='Depot',
+            icon=folium.Icon(icon='home', color='red')
+        ).add_to(m)
+
+        # クラスタに基づいて各拠点を地図上に追加
+        colors = ['blue', 'green', 'purple', 'orange', 'darkred', 'lightred', 'beige', 'darkblue', 'darkgreen', 'cadetblue']
+        for _, row in self.df.iterrows():
+            # デポはすでに追加されているのでスキップ
+            if row['Cluster'] == -1:
+                continue
+            cluster_color = colors[int(row['Cluster']) % len(colors)]
+            folium.CircleMarker(
+                location=[row['latitude'], row['longitude']],
+                radius=5,
+                color=cluster_color,
+                fill=True,
+                fill_color=cluster_color,
+                popup=f'Cluster: {row["Cluster"]}',
+            ).add_to(m)
+
+        # 地図をHTMLファイルとして保存
+        m.save('map_with_depot_and_clusters.html')
 
     def extract_cluster(self):
         self.cluster_df = self.df[(self.df['Cluster'] == -1) | (self.df['Cluster'] == self.cluster_id)].reset_index(drop=False)
         self.cluster_df.rename(columns={'index': 'id'}, inplace=True)
         self.cluster_df.to_csv(f'cluster_df_{self.cluster_id}.csv', index=False)
-        print(self.cluster_df)
 
     def calculate_distance_matrix(self):
         dist = [[great_circle((self.cluster_df.loc[i, 'latitude'], self.cluster_df.loc[i, 'longitude']),
                               (self.cluster_df.loc[j, 'latitude'], self.cluster_df.loc[j, 'longitude'])).meters
                  if i != j else 0 for j in range(len(self.cluster_df))] for i in range(len(self.cluster_df))]
         self.cost = np.array(dist)
-        print(self.cost)
+        # 距離行列をCSVファイルに保存
+        np.savetxt("cost_matrix_"+str(self.cluster_id)+".csv", self.cost, delimiter=",")
 
     def solve_vehicle_routing_problem(self, timeout_seconds=60):
         # Initializations
@@ -76,8 +98,17 @@ class ClusterBasedVehicleRouting:
                                         for k in range(self.vehicle_count)],
                                   cat=pulp.LpBinary)
         
+        self.y = pulp.LpVariable.dicts("y", [k for k in range(self.vehicle_count)], cat=pulp.LpBinary)
+        
         # Objective function
-        problem += pulp.lpSum([self.cost[i][j] * x[(i, j, k)] for i in range(customer_count) for j in range(customer_count) for k in range(self.vehicle_count) if i != j])
+        #problem += pulp.lpSum([self.cost[i][j] * x[(i, j, k)] for i in range(customer_count) for j in range(customer_count) for k in range(self.vehicle_count) if i != j])
+        # 重みの導入
+        weight_distance = 1
+        weight_vehicle_use = 1000  # 車両使用を重視するために大きな重みを設定
+
+        # 目的関数
+        problem += pulp.lpSum([self.cost[i][j] * x[(i, j, k)] for i in range(customer_count) for j in range(customer_count) for k in range(self.vehicle_count) if i != j]) * weight_distance + pulp.lpSum([self.y[k] for k in range(self.vehicle_count)]) * weight_vehicle_use
+
 
         # Constraints
         for j in range(1, customer_count):
@@ -99,6 +130,9 @@ class ClusterBasedVehicleRouting:
         for i in range(2, customer_count):
             for s in itertools.combinations(range(1, customer_count), i):
                 problem += pulp.lpSum([x[(i, j, k)] for i in s for j in s for k in range(self.vehicle_count) if i != j]) <= len(s) - 1
+
+        for k in range(self.vehicle_count):
+            problem += self.y[k] >= pulp.lpSum([x[(i, j, k)] for i in range(customer_count) for j in range(1, customer_count) if i != j]) / (customer_count - 1)
 
         # Solve the problem
 #        solver = pulp.PULP_CBC_CMD(msg=False)
@@ -140,6 +174,13 @@ class ClusterBasedVehicleRouting:
         # Calculate distances for each vehicle
         for k, route in self.routes.items():
             self.distances[k] = sum([self.cost[route[i]][route[i+1]] for i in range(len(route)-1)])
+        # 問題を解いた後
+        self.calculate_used_vehicles()
+
+    def calculate_used_vehicles(self):
+        used_vehicles = sum([1 for k in range(self.vehicle_count) if pulp.value(self.y[k]) == 1])
+        print(f"Used vehicles: {used_vehicles}")
+
 
     def create_routes_map(self):
         map_center = [self.depot_latitude, self.depot_longitude]
@@ -270,7 +311,6 @@ class ClusterBasedVehicleRouting:
 
 
     def run(self):
-        self.load_and_prepare_data()
         self.perform_clustering()
         self.prepare_depot()
         self.extract_cluster()
@@ -288,7 +328,7 @@ if __name__ == "__main__":
     depot_latitude = 34.638221
     depot_longitude = 138.128204
     file_name = 'peoplelist.csv'
-    cluster_id = 6
+    cluster_id = 0
 
     vrp = ClusterBasedVehicleRouting(vehicle_count, vehicle_capacity, n_clusters, depot_latitude, depot_longitude, file_name, cluster_id)  # Update the file_name accordingly
     vrp.run()
