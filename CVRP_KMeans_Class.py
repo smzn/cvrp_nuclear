@@ -10,7 +10,7 @@ import psutil
 import os
 
 class ClusterBasedVehicleRouting:
-    def __init__(self, vehicle_count, vehicle_capacity, n_clusters, depot_latitude, depot_longitude, file_name, cluster_id):
+    def __init__(self, vehicle_count, vehicle_capacity, n_clusters, depot_latitude, depot_longitude, file_name, cluster_id, timeout_seconds):
         self.vehicle_count = vehicle_count
         self.vehicle_capacity = vehicle_capacity
         self.n_clusters = n_clusters
@@ -24,6 +24,7 @@ class ClusterBasedVehicleRouting:
         self.routes = {}
         self.distances = {}
         self.result_status = None
+        self.timeout_seconds = timeout_seconds
 
     def perform_clustering(self):
         X = self.df[['longitude', 'latitude']]
@@ -83,7 +84,7 @@ class ClusterBasedVehicleRouting:
         # 距離行列をCSVファイルに保存
         np.savetxt("cost_matrix_"+str(self.cluster_id)+".csv", self.cost, delimiter=",")
 
-    def solve_vehicle_routing_problem(self, timeout_seconds=60):
+    def solve_vehicle_routing_problem(self):
         # Initializations
         customer_count = len(self.cluster_df)
         depot_index = 0  # Assuming the first row is the depot
@@ -139,7 +140,7 @@ class ClusterBasedVehicleRouting:
 #        problem.solve(solver)
 
         # Solve the problem
-        solver = pulp.PULP_CBC_CMD(msg=True, timeLimit=timeout_seconds)
+        solver = pulp.PULP_CBC_CMD(msg=True, timeLimit=self.timeout_seconds)
         self.result_status = problem.solve(solver)
 
         # Check if a feasible solution was found

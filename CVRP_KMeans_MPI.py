@@ -1,5 +1,6 @@
 from mpi4py import MPI
 import sys
+import pandas as pd
 from CVRP_KMeans_Class import ClusterBasedVehicleRouting
 
 if __name__ == "__main__":
@@ -15,11 +16,12 @@ if __name__ == "__main__":
     depot_latitude = 34.638221
     depot_longitude = 138.128204
     file_name = 'peoplelist.csv'  # 適切なファイル名に更新してください
+    timeout_seconds = 60
 
     # クラスタIDをプロセスに割り当てる
     for cluster_id in range(rank, n_clusters, size):
         # ClusterBasedVehicleRouting インスタンスの作成と実行
-        vrp = ClusterBasedVehicleRouting(vehicle_count, vehicle_capacity, n_clusters, depot_latitude, depot_longitude, file_name, cluster_id)
+        vrp = ClusterBasedVehicleRouting(vehicle_count, vehicle_capacity, n_clusters, depot_latitude, depot_longitude, file_name, cluster_id, timeout_seconds)
         vrp.run()
 
     # MPIの終了
