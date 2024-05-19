@@ -187,6 +187,63 @@ class CVRP_GA:
 
         return df_routes
     
+    def create_routes_map_allonly(self, df_routes, map_filename='routes_map.html'):
+        """df_routesを基にしてルートを地図上に描画し、ファイルに保存する"""
+        # デポの位置
+        depot_position = (self.depot_latitude, self.depot_longitude)
+
+        # 地図の作成（デポの位置を中心とする）
+        m = folium.Map(location=depot_position, zoom_start=13)
+
+        # デポを地図上に追加
+        folium.Marker(depot_position, popup='Depot', icon=folium.Icon(color='red', icon='home')).add_to(m)
+
+        # 色のリストを定義
+        colors = ['blue', 'green', 'purple', 'orange', 'darkred', 'lightred', 'darkblue', 'cadetblue', 'darkgreen', 'lightblue']
+
+        # df_routesから各ルートを可視化
+        for index, row in df_routes.iterrows():
+            # ルートを表す顧客インデックスのリストを取得
+            route_indices = []
+            parts = row['Route'].split('>')
+
+            for part in parts:
+                part = part.strip()
+                if '-(' in part:
+                    part = part.split('-(')[0].strip()
+                if part.isdigit():
+                    route_indices.append(int(part))
+
+            # デポを先頭と末尾に追加（重複を避ける）
+            if route_indices[0] != 0:
+                route_indices = [0] + route_indices
+            if route_indices[-1] != 0:
+                route_indices.append(0)
+
+            # デバッグ用にルートインデックスを表示
+            print(f"Route string: {row['Route']}")
+            print(f"Route indices: {route_indices}")
+
+            # ルートの線を描画
+            route_positions = [(self.depot_latitude, self.depot_longitude)] + \
+                            [(self.df.loc[idx, 'latitude'], self.df.loc[idx, 'longitude']) for idx in route_indices[1:-1]] + \
+                            [(self.depot_latitude, self.depot_longitude)]
+            print(f"Route positions: {route_positions}")  # デバッグ用: ルート位置を表示
+            folium.PolyLine(route_positions, color=colors[index % len(colors)], weight=5, opacity=0.8).add_to(m)
+
+            # 各顧客位置にマーカーを追加
+            for pos in route_positions[1:-1]:  # デポを除外
+                folium.CircleMarker(
+                    location=pos,
+                    radius=5,
+                    color=colors[index % len(colors)],
+                    fill=True,
+                    fill_color=colors[index % len(colors)]
+                ).add_to(m)
+
+        # 地図をHTMLファイルとして保存
+        m.save(map_filename)
+
     def create_routes_map(self, df_routes, map_filename='routes_map.html'):
         """df_routesを基にしてルートを地図上に描画し、ファイルに保存する"""
         # デポの位置
@@ -204,10 +261,31 @@ class CVRP_GA:
         # df_routesから各ルートを可視化
         for index, row in df_routes.iterrows():
             # ルートを表す顧客インデックスのリストを取得
-            route_indices = [0] + list(map(int, row['Route'].split('->')[1:-1])) + [0]  # デポを先頭と末尾に追加
+            route_indices = []
+            parts = row['Route'].split('>')
+
+            for part in parts:
+                part = part.strip()
+                if '-(' in part:
+                    part = part.split('-(')[0].strip()
+                if part.isdigit():
+                    route_indices.append(int(part))
+
+            # デポを先頭と末尾に追加（重複を避ける）
+            if route_indices[0] != 0:
+                route_indices = [0] + route_indices
+            if route_indices[-1] != 0:
+                route_indices.append(0)
+
+            # デバッグ用にルートインデックスを表示
+            print(f"Route string: {row['Route']}")
+            print(f"Route indices: {route_indices}")
 
             # ルートの線を描画
-            route_positions = [(self.df.loc[idx, 'latitude'], self.df.loc[idx, 'longitude']) for idx in route_indices]
+            route_positions = [(self.depot_latitude, self.depot_longitude)] + \
+                            [(self.df.loc[idx, 'latitude'], self.df.loc[idx, 'longitude']) for idx in route_indices[1:-1]] + \
+                            [(self.depot_latitude, self.depot_longitude)]
+            print(f"Route positions: {route_positions}")  # デバッグ用: ルート位置を表示
             folium.PolyLine(route_positions, color=colors[index % len(colors)], weight=5, opacity=0.8).add_to(m)
 
             # 各顧客位置にマーカーを追加
@@ -220,8 +298,27 @@ class CVRP_GA:
                     fill_color=colors[index % len(colors)]
                 ).add_to(m)
 
-        # 地図をHTMLファイルとして保存
+            # 各ルートごとの地図を作成
+            route_map = folium.Map(location=depot_position, zoom_start=13)
+            folium.Marker(depot_position, popup='Depot', icon=folium.Icon(color='red', icon='home')).add_to(route_map)
+            folium.PolyLine(route_positions, color=colors[index % len(colors)], weight=5, opacity=0.8).add_to(route_map)
+            for pos in route_positions[1:-1]:  # デポを除外
+                folium.CircleMarker(
+                    location=pos,
+                    radius=5,
+                    color=colors[index % len(colors)],
+                    fill=True,
+                    fill_color=colors[index % len(colors)]
+                ).add_to(route_map)
+            
+            # 各ルートごとの地図を保存
+            route_map.save(f'route_map_{index + 1}.html')
+
+        # 全体の地図をHTMLファイルとして保存
         m.save(map_filename)
+
+
+
 
 
 if __name__ == "__main__":
@@ -243,7 +340,7 @@ if __name__ == "__main__":
     vehicle_count = 10
     vehicle_capacity = 4
     population_size = 50
-    ngen = 10
+    ngen = 20
     cxpb = 0.7
     mutpb = 0.2
 
