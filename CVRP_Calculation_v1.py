@@ -1,5 +1,8 @@
 import random
 import numpy as np
+import csv
+import matplotlib.pyplot as plt
+import copy
 
 class CVRP_Calculation:
     def __init__(self, nodes, vehicles, cost_matrix, population_size, crossover_rate, mutation_rate, generations, penalty):
@@ -112,7 +115,11 @@ class CVRP_Calculation:
                 if self.check_constraints(individual):
                     population.append(individual)
                     break  # 有効な個体を生成した場合、次へ
-
+        # 個体の構造確認
+        for ind in population:
+            for route in ind:
+                if not isinstance(route, list):
+                    raise ValueError(f"不正なルート構造が発見されました: {route}")
         return population
 
     
@@ -144,6 +151,196 @@ class CVRP_Calculation:
 
         # すべての要支援者が訪問されているか確認
         return visited_clients == set(self.V)
+
+    def select_parents(self, population, fitness_values, k=3):
+        """
+        トーナメント選択で親個体を選択。
+        """
+        selected = random.sample(range(len(population)), k)
+        best = min(selected, key=lambda idx: fitness_values[idx])
+        return population[best]
+
+    def crossover(self, parent1, parent2):
+        """
+        部分順序交叉 (PMX) を実装。
+        """
+        child1 = [-1] * len(parent1)
+        child2 = [-1] * len(parent2)
+        start, end = sorted(random.sample(range(len(parent1)), 2))
+        child1[start:end] = parent1[start:end]
+        child2[start:end] = parent2[start:end]
+
+        pos = end
+        for i in range(len(parent2)):
+            idx = (end + i) % len(parent2)
+            if parent2[idx] not in child1:
+                child1[pos % len(child1)] = parent2[idx]
+                pos += 1
+
+        pos = end
+        for i in range(len(parent1)):
+            idx = (end + i) % len(parent1)
+            if parent1[idx] not in child2:
+                child2[pos % len(child2)] = parent1[idx]
+                pos += 1
+
+        # 子個体の構造確認
+        if not isinstance(child1, list) or not isinstance(child2, list):
+            raise ValueError(f"不正な交叉結果が発見されました: {child1}, {child2}")
+        return child1, child2
+
+    def mutate(self, individual, mutation_rate=0.1):
+        """
+        突然変異: ランダムな部分区間を逆順にする。
+        :param individual: 個体 (リスト: 各車両のルート)
+        :param mutation_rate: 突然変異率
+        """
+        for route_index, route in enumerate(individual):
+            # ルートがリストでない場合、自動修正またはエラーを記録
+            if not isinstance(route, list):
+                print(f"警告: 予期しないデータ型 {type(route)} が発見されました。修正を試みます。")
+                #individual[route_index] = [0, route, 0] if isinstance(route, int) else [0, 0]
+                #route = individual[route_index]
+
+            # 短いルートでは突然変異をスキップ
+            if len(route) <= 3:
+                continue
+
+            if random.random() < mutation_rate:
+                # ランダムな部分区間を逆順にする
+                i, j = sorted(random.sample(range(1, len(route) - 1), 2))
+                route[i:j] = reversed(route[i:j])
+
+
+    def create_next_generation(self, population):
+        """
+        次世代を構築する。
+        :param population: 現世代の集団 (リスト)
+        :return: 次世代の集団 (リスト)
+        """
+        # 適応度を計算
+        fitness_values = [self.evaluate_individual(ind) for ind in population]
+
+        # エリート個体を保存 (最良個体)
+        best_individual = copy.deepcopy(population[np.argmin(fitness_values)])
+        best_fitness = min(fitness_values)
+
+        # 次世代集団を構築
+        next_generation = []
+
+        # エリート個体を次世代に追加
+        next_generation.append(best_individual)
+
+        # 親選択、交叉、突然変異を繰り返して新しい個体を生成
+        while len(next_generation) < self.population_size:
+            # 親選択
+            parent1 = self.select_parents(population, fitness_values)
+            parent2 = self.select_parents(population, fitness_values)
+
+            # 交叉
+            if random.random() < self.crossover_rate:
+                child1, child2 = self.crossover(parent1, parent2)
+            else:
+                child1, child2 = parent1[:], parent2[:]
+
+            # 突然変異
+            self.mutate(child1, self.mutation_rate)
+            self.mutate(child2, self.mutation_rate)
+
+            # 制約確認を追加
+            if self.check_constraints(child1) and len(next_generation) < self.population_size:
+                next_generation.append(child1)
+            if self.check_constraints(child2) and len(next_generation) < self.population_size:
+                next_generation.append(child2)
+
+        return next_generation[:self.population_size]
+
+
+    def run_genetic_algorithm(self, max_generations, output_csv='./result/genetic_results.csv', best_individual_csv='./result/best_individual.csv'):
+        """
+        遺伝アルゴリズムを実行し、結果を保存。
+        :param max_generations: 世代数
+        :param output_csv: 結果を保存するCSVファイルの名前
+        :return: 全世代を通じての最良個体とその適合度
+        """
+        # 初期集団生成
+        population = self.generate_initial_population()
+
+        # CSVデータの準備
+        results = []
+        best_overall_individual = None
+        best_overall_fitness = float('inf')
+
+        for generation in range(max_generations):
+            # 適応度の計算
+            fitness_values = [self.evaluate_individual(ind) for ind in population]
+
+            # 現世代のデータ
+            best_fitness = min(fitness_values)
+            mean_fitness = np.mean(fitness_values)
+            std_fitness = np.std(fitness_values)
+
+            # 最良個体の保存
+            best_individual = population[np.argmin(fitness_values)]
+            if best_fitness < best_overall_fitness:
+                best_overall_fitness = best_fitness
+                best_overall_individual = best_individual
+
+            # 結果を記録
+            results.append([generation + 1, best_fitness, mean_fitness, std_fitness])
+
+            # 次世代を作成
+            population = self.create_next_generation(population)
+
+            # 現世代の進捗を表示
+            print(f"世代 {generation + 1}: 最良適合度 = {best_fitness}, 平均適合度 = {mean_fitness}, 標準偏差 = {std_fitness}")
+
+        # 結果をCSVに保存
+        with open(output_csv, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['Generation', 'Best Fitness', 'Mean Fitness', 'Std Dev'])
+            writer.writerows(results)
+
+        # 最良個体をCSVに保存
+        with open(best_individual_csv, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['Vehicle', 'Route', 'Fitness'])
+            for i, route in enumerate(best_overall_individual):
+                writer.writerow([f"Vehicle {i + 1}", ' -> '.join(map(str, route)), ""])
+            writer.writerow([])
+            writer.writerow(['Best Fitness', best_overall_fitness])
+
+        print(f"\n全世代を通しての最良適合度: {best_overall_fitness}")
+        print("最良個体:")
+        for route in best_overall_individual:
+            print(f"  ルート: {route}")
+
+        # グラフの作成
+        self.plot_results(results, output_csv.replace('.csv', '.png'))
+
+        return best_overall_individual, best_overall_fitness
+
+    def plot_results(self, results, output_image='./result/genetic_results.png'):
+        """
+        遺伝アルゴリズムの結果をプロット。
+        :param results: 世代ごとの結果データ (リスト)
+        :param output_image: グラフを保存するファイル名
+        """
+        generations = [row[0] for row in results]
+        best_fitness = [row[1] for row in results]
+        mean_fitness = [row[2] for row in results]
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(generations, best_fitness, label="Best Fitness", marker='o')
+        plt.plot(generations, mean_fitness, label="Mean Fitness", marker='x')
+        plt.xlabel("Generation")
+        plt.ylabel("Fitness")
+        plt.title("Genetic Algorithm Progress")
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(output_image)
+        #plt.show()
+        print(f"結果のグラフを保存しました: {output_image}")
 
 
 
