@@ -3,6 +3,7 @@ import numpy as np
 import csv
 import matplotlib.pyplot as plt
 import copy
+import os
 
 class CVRP_Calculation:
     def __init__(self, nodes, vehicles, cost_matrix, population_size, crossover_rate, mutation_rate, generations, penalty):
@@ -490,5 +491,266 @@ class CVRP_Calculation:
         #plt.show()
         print(f"結果のグラフを保存しました: {output_image}")
 
+    def save_vehicle_statistics(self, best_individual, output_dir='./result/'):
+        """
+        車両ごとの統計（移動距離、搬送人数、搬送回数）を計算し、グラフとCSVで保存。
+        :param best_individual: 最良個体
+        :param output_dir: 出力先のディレクトリ
+        """
+        os.makedirs(output_dir, exist_ok=True)
 
+        vehicle_costs = []  # 各車両の移動距離
+        vehicle_loads = []  # 各車両の搬送人数
+        vehicle_shelter_visits = []  # 各車両の避難所訪問回数
 
+        for route in best_individual:
+            route_cost = 0
+            total_load = 0
+            shelter_visits = 0
+            previous_node = 0  # デポから出発
+
+            for node in route:
+                if node in self.H:
+                    shelter_visits += 1
+                if node in self.V:
+                    total_load += self.d[node]
+
+                route_cost += self.c[previous_node][node]
+                previous_node = node
+
+            vehicle_costs.append(route_cost)
+            vehicle_loads.append(total_load)
+            vehicle_shelter_visits.append(shelter_visits)
+
+        # CSVに保存
+        csv_file = os.path.join(output_dir, 'vehicle_statistics.csv')
+        with open(csv_file, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['Vehicle', 'Cost (Distance)', 'Load (People)', 'Shelter Visits'])
+            for i, (cost, load, visits) in enumerate(zip(vehicle_costs, vehicle_loads, vehicle_shelter_visits), start=1):
+                writer.writerow([f"Vehicle {i}", cost, load, visits])
+
+        print(f"車両統計データをCSVに保存しました: {csv_file}")
+
+        # グラフ作成
+        self.plot_vehicle_statistics(vehicle_costs, 'Cost (Distance)', os.path.join(output_dir, 'vehicle_costs.png'))
+        self.plot_vehicle_statistics(vehicle_loads, 'Load (People)', os.path.join(output_dir, 'vehicle_loads.png'))
+        self.plot_vehicle_statistics(vehicle_shelter_visits, 'Shelter Visits', os.path.join(output_dir, 'vehicle_shelter_visits.png'))
+
+    def plot_vehicle_statistics(self, data, ylabel, output_image):
+        """
+        統計データの棒グラフを作成して保存。
+        :param data: 統計データ（リスト）
+        :param ylabel: Y軸のラベル
+        :param output_image: 保存先の画像ファイルパス
+        """
+        plt.figure(figsize=(10, 6))
+        plt.bar(range(1, len(data) + 1), data)
+        plt.xlabel('Vehicle')
+        plt.ylabel(ylabel)
+        plt.title(f'Vehicle {ylabel}')
+        plt.grid(axis='y')
+        plt.xticks(range(1, len(data) + 1), [f"V{i}" for i in range(1, len(data) + 1)])
+        plt.savefig(output_image)
+        plt.close()
+        print(f"グラフを保存しました: {output_image}")
+
+    def visualize_routes(self, best_individual, nodes, output_dir='./result/'):
+        """
+        車両ごとの搬送ルートを可視化し、画像として保存。
+        :param best_individual: 最良個体
+        :param nodes: ノード情報（辞書リスト）
+        :param output_dir: 出力先のディレクトリ
+        """
+        os.makedirs(output_dir, exist_ok=True)
+
+        # ノード座標を取得
+        node_positions = {node["id"]: (node["x"], node["y"]) for node in nodes}
+
+        # ノードの描画設定（色と形）
+        def plot_node(node, x, y):
+            if node["type"] == "city_hall":
+                plt.scatter(x, y, color="blue", marker="s", s=100)
+            elif node["type"] == "shelter":
+                plt.scatter(x, y, color="green", marker="^", s=100)
+            elif node["type"] == "client":
+                cmap = plt.cm.viridis
+                norm = plt.Normalize(1, max(n["demand"] for n in nodes if n["type"] == "client"))
+                color = cmap(norm(node["demand"]))
+                plt.scatter(x, y, color=color, marker="o", s=100)
+
+        # 矢印描画設定
+        arrow_params = {
+            "head_width": 0.5,  # 矢印の先端の幅
+            "head_length": 0.5,  # 矢印の先端の長さ
+            "width": 0.002,  # 矢印の線の太さ
+            "length_includes_head": True,
+            "alpha": 0.7,
+        }
+
+        # 各車両のルートを個別に可視化
+        for vehicle_id, route in enumerate(best_individual, start=1):
+            plt.figure(figsize=(8, 8))
+
+            # ノードと矢印を描画
+            for i, node_id in enumerate(route[:-1]):
+                next_node_id = route[i + 1]
+                x, y = node_positions[node_id]
+                next_x, next_y = node_positions[next_node_id]
+                
+                # ノードのプロット
+                node = next(n for n in nodes if n["id"] == node_id)
+                plot_node(node, x, y)
+
+                # 矢印でルートを表示
+                plt.arrow(x, y, next_x - x, next_y - y, color="black", **arrow_params)
+
+            # 最後のノードをプロット
+            last_node = next(n for n in nodes if n["id"] == route[-1])
+            last_x, last_y = node_positions[route[-1]]
+            plot_node(last_node, last_x, last_y)
+
+            plt.title(f"Vehicle {vehicle_id} Route")
+            plt.xlabel('X Coordinate')
+            plt.ylabel('Y Coordinate')
+            plt.grid(True)
+            plt.savefig(os.path.join(output_dir, f'vehicle_{vehicle_id}_route.png'))
+            plt.close()
+            print(f"車両 {vehicle_id} のルートを保存しました: {output_dir}/vehicle_{vehicle_id}_route.png")
+
+        # 全車両のルートを1つの図にまとめて可視化
+        plt.figure(figsize=(10, 10))
+        color_map = plt.cm.get_cmap('tab10', len(best_individual))  # 車両数に応じて色を割り当て
+
+        legend_handles = []  # 凡例用
+
+        for vehicle_id, route in enumerate(best_individual, start=1):
+            vehicle_color = color_map(vehicle_id - 1)  # 車両ごとに色を割り当て
+
+            # ノードと矢印を描画
+            for i, node_id in enumerate(route[:-1]):
+                next_node_id = route[i + 1]
+                x, y = node_positions[node_id]
+                next_x, next_y = node_positions[next_node_id]
+                
+                # 矢印でルートを表示
+                arrow_params["color"] = vehicle_color  # 矢印の色を更新
+                plt.arrow(x, y, next_x - x, next_y - y, **arrow_params)
+
+            # ノードのプロット
+            for node_id in route:
+                node = next(n for n in nodes if n["id"] == node_id)
+                x, y = node_positions[node_id]
+                plot_node(node, x, y)
+
+            # 凡例に車両の色を追加
+            legend_handles.append(plt.Line2D([0], [0], color=vehicle_color, lw=2, label=f"Vehicle {vehicle_id}"))
+
+        # 凡例を追加（車両ごとの色のみ表示）
+        plt.legend(handles=legend_handles, title="Vehicles", loc="upper left", bbox_to_anchor=(1.05, 1), fontsize=10)
+        plt.title("All Vehicle Routes")
+        plt.xlabel('X Coordinate')
+        plt.ylabel('Y Coordinate')
+        plt.grid(True)
+        plt.savefig(os.path.join(output_dir, 'all_vehicle_routes.png'))
+        plt.close()
+        print(f"全車両のルートを保存しました: {output_dir}/all_vehicle_routes.png")
+
+    '''
+    def visualize_routes(self, best_individual, nodes, output_dir='./result/'):
+        """
+        車両ごとの搬送ルートを可視化し、画像として保存。
+        :param best_individual: 最良個体
+        :param nodes: ノード情報（辞書リスト）
+        :param output_dir: 出力先のディレクトリ
+        """
+        os.makedirs(output_dir, exist_ok=True)
+
+        # ノード座標を取得
+        node_positions = {node["id"]: (node["x"], node["y"]) for node in nodes}
+
+        # ノードの描画設定（色と形）
+        def plot_node(node, x, y):
+            if node["type"] == "city_hall":
+                plt.scatter(x, y, color="blue", marker="s", s=100, label="City Hall")
+            elif node["type"] == "shelter":
+                plt.scatter(x, y, color="green", marker="^", s=100, label="Shelter")
+            elif node["type"] == "client":
+                cmap = plt.cm.viridis
+                norm = plt.Normalize(1, max(n["demand"] for n in nodes if n["type"] == "client"))
+                color = cmap(norm(node["demand"]))
+                plt.scatter(x, y, color=color, marker="o", s=100, label="Client")
+
+        # 矢印描画設定
+        arrow_params = {
+            "head_width": 0.5,  # 矢印の先端の幅
+            "head_length": 0.5,  # 矢印の先端の長さ
+            "width": 0.002,  # 矢印の線の太さ
+            "length_includes_head": True,
+            "color": "black",
+            "alpha": 0.7,
+        }
+
+        # 各車両のルートを個別に可視化
+        for vehicle_id, route in enumerate(best_individual, start=1):
+            plt.figure(figsize=(8, 8))
+
+            # ノードと矢印を描画
+            for i, node_id in enumerate(route[:-1]):
+                next_node_id = route[i + 1]
+                x, y = node_positions[node_id]
+                next_x, next_y = node_positions[next_node_id]
+                
+                # ノードのプロット
+                node = next(n for n in nodes if n["id"] == node_id)
+                plot_node(node, x, y)
+
+                # 矢印でルートを表示
+                plt.arrow(
+                    x, y, next_x - x, next_y - y, **arrow_params)
+
+            # 最後のノードをプロット
+            last_node = next(n for n in nodes if n["id"] == route[-1])
+            last_x, last_y = node_positions[route[-1]]
+            plot_node(last_node, last_x, last_y)
+
+            plt.title(f"Vehicle {vehicle_id} Route")
+            plt.xlabel('X Coordinate')
+            plt.ylabel('Y Coordinate')
+            plt.grid(True)
+            plt.savefig(os.path.join(output_dir, f'vehicle_{vehicle_id}_route.png'))
+            plt.close()
+            print(f"車両 {vehicle_id} のルートを保存しました: {output_dir}/vehicle_{vehicle_id}_route.png")
+
+        # 全車両のルートを1つの図にまとめて可視化
+        plt.figure(figsize=(10, 10))
+        color_map = plt.cm.get_cmap('tab10', len(best_individual))  # 車両数に応じて色を割り当て
+
+        for vehicle_id, route in enumerate(best_individual, start=1):
+            vehicle_color = color_map(vehicle_id - 1)  # 車両ごとに色を割り当て
+
+            # ノードと矢印を描画
+            for i, node_id in enumerate(route[:-1]):
+                next_node_id = route[i + 1]
+                x, y = node_positions[node_id]
+                next_x, next_y = node_positions[next_node_id]
+                
+                # 矢印でルートを表示
+                arrow_params["color"] = vehicle_color  # 矢印の色を更新
+                plt.arrow(x, y, next_x - x, next_y - y, **arrow_params)
+
+            # ノードのプロット
+            for node_id in route:
+                node = next(n for n in nodes if n["id"] == node_id)
+                x, y = node_positions[node_id]
+                plot_node(node, x, y)
+
+        plt.title("All Vehicle Routes")
+        plt.xlabel('X Coordinate')
+        plt.ylabel('Y Coordinate')
+        plt.grid(True)
+        plt.legend(title="Node Type", loc="upper left", bbox_to_anchor=(1.05, 1), fontsize=10)
+        plt.savefig(os.path.join(output_dir, 'all_vehicle_routes.png'))
+        plt.close()
+        print(f"全車両のルートを保存しました: {output_dir}/all_vehicle_routes.png")
+    '''
