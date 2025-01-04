@@ -63,94 +63,134 @@ class CVRP_Calculation:
 
             for node in vehicle_route:
                 if node == 0:  # デポは積載量に影響を与えない
+                    previous_node = node  # デポを次の計算の基点に設定
                     continue
 
-                load += self.d[node]  # 要支援者人数を加算
-                if load > max(self.Q.values()):  # 最大積載量を超えた場合
-                    vehicle_penalties += self.penalty
+                if node in self.V:  # 要支援者ノードの場合のみ処理
+                    load += self.d[node]  # 要支援者の需要を加算
+                    if load > max(self.Q.values()):  # 最大積載量を超えた場合
+                        vehicle_penalties += self.penalty
 
                 # 移動コストを加算
-                route_cost += self.c[previous_node, node]
+                route_cost += self.c[previous_node][node]
                 previous_node = node
 
             # デポに戻るコストを加算
-            route_cost += self.c[previous_node, 0]
+            route_cost += self.c[previous_node][0]
 
             total_cost += route_cost
 
         return total_cost + vehicle_penalties
-
     
-    def generate_initial_population(self):
+    def generate_initial_population(self, population_size=1):
         """
         初期集団を生成し、制約を確認する。
+        要支援者全体のルートを生成し、それを車両台数で分割。
+        キャパを超える前に避難所を挿入してルートを作成する。
         :return: 制約を満たす初期集団 (リスト)
         """
         population = []
-        for _ in range(self.population_size):
+        for _ in range(population_size):
             while True:
-                # 要支援者をランダムな順序にシャッフル
+                # ステップ 1: 要支援者全体のルートをシャッフルして生成
                 shuffled_clients = random.sample(self.V, len(self.V))
-                individual = []  # 一つの個体（ルート群）
+                #print(f"  Shuffled clients: {shuffled_clients}")
 
-                current_vehicle_route = []  # 現在の車両のルート
-                current_load = 0  # 現在の車両の積載量
+                # ステップ 2: 台数分に均等分割
+                num_vehicles = len(self.Q)
+                split_size = len(shuffled_clients) // num_vehicles
+                split_routes = [
+                    shuffled_clients[i * split_size:(i + 1) * split_size]
+                    for i in range(num_vehicles)
+                ]
+                # 余りを最後の車両に追加
+                remainder = len(shuffled_clients) % num_vehicles
+                if remainder > 0:
+                    split_routes[-1].extend(shuffled_clients[-remainder:])
 
-                for client in shuffled_clients:
-                    client_demand = self.d[client]
-                    if current_load + client_demand <= max(self.Q.values()):  # 積載量制約を確認
-                        current_vehicle_route.append(client)
-                        current_load += client_demand
-                    else:
-                        # 制約を超えた場合、ルートを確定して次の車両に移る
-                        individual.append([0] + current_vehicle_route + [0])  # デポを追加
-                        current_vehicle_route = [client]
-                        current_load = client_demand
+                #print(f"  Split routes (before capacity adjustment): {split_routes}")
 
-                # 最後の車両のルートを追加
-                if current_vehicle_route:
-                    individual.append([0] + current_vehicle_route + [0])  # デポを追加
+                # ステップ 3: 各ルートにキャパを考慮して避難所を挿入
+                individual = []
+                for route_index, route in enumerate(split_routes):
+                    current_vehicle_route = [0]  # デポで開始
+                    current_load = 0  # 現在の積載量
 
-                # 制約確認: 制約を満たす場合のみ追加
+                    for client in route:
+                        client_demand = self.d[client]
+                        if current_load + client_demand <= max(self.Q.values()):  # キャパシティ確認
+                            # キャパ内なら要支援者を追加
+                            current_vehicle_route.append(client)
+                            current_load += client_demand
+                        else:
+                            # キャパ超過前に避難所を追加
+                            last_client = current_vehicle_route[-1]
+                            nearest_shelter = min(self.H, key=lambda shelter: self.c[last_client][shelter])
+                            current_vehicle_route.append(nearest_shelter)
+                            #print(f"      Added shelter {nearest_shelter} to route, resetting load.")
+                            current_load = client_demand  # キャパリセット
+                            current_vehicle_route.append(client)
+
+                    # 最後に避難所を追加してデポに戻る
+                    if current_vehicle_route[-1] not in self.H:
+                        last_client = current_vehicle_route[-1]
+                        nearest_shelter = min(self.H, key=lambda shelter: self.c[last_client][shelter])
+                        current_vehicle_route.append(nearest_shelter)
+                    current_vehicle_route.append(0)  # デポに戻る
+                    individual.append(current_vehicle_route)
+                    #print(f"    Final route for vehicle {route_index + 1}: {current_vehicle_route}")
+
+                # 制約確認: 制約を満たす場合のみ集団に追加
                 if self.check_constraints(individual):
                     population.append(individual)
+                    #print(f"  Added individual to population.")
                     break  # 有効な個体を生成した場合、次へ
-        # 個体の構造確認
-        for ind in population:
-            for route in ind:
-                if not isinstance(route, list):
-                    raise ValueError(f"不正なルート構造が発見されました: {route}")
-        return population
+                else:
+                    print("  Constraint check failed. Retrying...")
 
+        #print(f"Initial population size: {len(population)}")
+        return population
+    
     
     def check_constraints(self, individual):
         """
-        個体が制約を満たしているか確認。
-        :param individual: 個体 (遺伝子表現: 各車両のルートのリスト)
-        :return: True (制約を満たす) または False (制約違反)
+        制約を確認する。
+        :param individual: 車両ルート（リスト）
+        :return: True（制約を満たす場合）または False（制約違反の場合）
         """
         visited_clients = set()  # 訪問済みの要支援者
+        #print("  Checking constraints...")
 
-        for vehicle_route in individual:
+        for route_index, route in enumerate(individual):
             current_load = 0  # 現在の積載量
 
-            for node in vehicle_route:
-                if node == 0:  # デポ (市役所) は無視
+            for node in route:
+                if node == 0:  # デポは無視
                     continue
-
-                # 同じ要支援者を複数回訪問している場合は制約違反
-                if node in visited_clients:
-                    return False
-
-                visited_clients.add(node)
-                current_load += self.d[node]  # 要支援者人数を加算
-
-                # 積載量制約を超えた場合は制約違反
-                if current_load > max(self.Q.values()):
+                if node in self.V:  # 要支援者ノードの場合
+                    if node in visited_clients:
+                        print(f"    Constraint failed: client {node} visited multiple times in route {route_index + 1}.")
+                        return False
+                    visited_clients.add(node)
+                    current_load += self.d[node]
+                    if current_load > max(self.Q.values()):  # キャパ超過
+                        print(f"    Constraint failed: capacity exceeded in route {route_index + 1}. Load: {current_load}")
+                        return False
+                elif node in self.H:  # 避難所ノードの場合
+                    #print(f"    Reached shelter {node}, resetting load.")
+                    current_load = 0  # キャパリセット
+                else:
+                    print(f"    Unknown node {node} in route {route_index + 1}.")
                     return False
 
         # すべての要支援者が訪問されているか確認
-        return visited_clients == set(self.V)
+        if visited_clients != set(self.V):
+            missing_clients = set(self.V) - visited_clients
+            print(f"    Constraint failed: missing clients {missing_clients}.")
+            return False
+
+        #print("  Constraints satisfied.")
+        return True
 
     def select_parents(self, population, fitness_values, k=3):
         """
@@ -162,55 +202,159 @@ class CVRP_Calculation:
 
     def crossover(self, parent1, parent2):
         """
-        部分順序交叉 (PMX) を実装。
+        交叉を行い、後処理で制約を満たすよう調整。
         """
-        child1 = [-1] * len(parent1)
-        child2 = [-1] * len(parent2)
-        start, end = sorted(random.sample(range(len(parent1)), 2))
-        child1[start:end] = parent1[start:end]
-        child2[start:end] = parent2[start:end]
+        child1 = []
+        child2 = []
 
-        pos = end
-        for i in range(len(parent2)):
-            idx = (end + i) % len(parent2)
-            if parent2[idx] not in child1:
-                child1[pos % len(child1)] = parent2[idx]
-                pos += 1
+        for route1, route2 in zip(parent1, parent2):
+            # 要支援者ノードのみ抽出して部分順序交叉を実施
+            clients1 = [node for node in route1 if node in self.V]
+            clients2 = [node for node in route2 if node in self.V]
 
-        pos = end
-        for i in range(len(parent1)):
-            idx = (end + i) % len(parent1)
-            if parent1[idx] not in child2:
-                child2[pos % len(child2)] = parent1[idx]
-                pos += 1
+            # PMX交叉
+            route_length = len(clients1)
+            new_clients1 = [-1] * route_length
+            new_clients2 = [-1] * route_length
 
-        # 子個体の構造確認
-        if not isinstance(child1, list) or not isinstance(child2, list):
-            raise ValueError(f"不正な交叉結果が発見されました: {child1}, {child2}")
-        return child1, child2
+            start, end = sorted(random.sample(range(route_length), 2))
+            new_clients1[start:end] = clients1[start:end]
+            new_clients2[start:end] = clients2[start:end]
+
+            pos1 = end
+            for i in range(len(clients2)):
+                idx = (end + i) % len(clients2)
+                if clients2[idx] not in new_clients1:
+                    new_clients1[pos1 % len(new_clients1)] = clients2[idx]
+                    pos1 += 1
+
+            pos2 = end
+            for i in range(len(clients1)):
+                idx = (end + i) % len(clients1)
+                if clients1[idx] not in new_clients2:
+                    new_clients2[pos2 % len(new_clients2)] = clients1[idx]
+                    pos2 += 1
+
+            # 後処理で制約を満たすよう調整
+            fixed_clients1 = self._fix_routes(new_clients1)
+            fixed_clients2 = self._fix_routes(new_clients2)
+
+            # 避難所を追加してルートを生成
+            child1.append(self._add_shelters_to_route(fixed_clients1))
+            child2.append(self._add_shelters_to_route(fixed_clients2))
+
+        # 全体の後処理（重複削除、未訪問ノード追加、避難所再配置）
+        fixed_child1 = self._validate_and_fix_routes(child1)
+        fixed_child2 = self._validate_and_fix_routes(child2)
+
+        return fixed_child1, fixed_child2
+
+    def _fix_routes(self, clients):
+        """
+        重複する訪問を削除し、未訪問拠点を追加。
+        :param clients: 要支援者ノードのリスト
+        :return: 修正済みの要支援者ノードのリスト
+        """
+        # 訪問されたクライアントを一意にする
+        unique_clients = []
+        seen = set()
+        for client in clients:
+            if client not in seen:
+                unique_clients.append(client)
+                seen.add(client)
+
+        # 未訪問のクライアントを探して追加
+        missing_clients = set(self.V) - set(unique_clients)
+        for missing_client in missing_clients:
+            insert_pos = random.randint(0, len(unique_clients))  # ランダムな位置に挿入
+            unique_clients.insert(insert_pos, missing_client)
+
+        return unique_clients
+
+    def _validate_and_fix_routes(self, individual):
+        """
+        個体全体を修正し、制約を満たすよう調整。
+        :param individual: 個体（ルートリスト）
+        :return: 修正済み個体
+        """
+        # 全ルートを1つのリストにまとめて検証
+        all_clients = []
+        for route in individual:
+            all_clients.extend([node for node in route if node in self.V])
+
+        # 重複削除と未訪問ノードの検出
+        fixed_clients = self._fix_routes(all_clients)
+
+        # 車両ごとに再分割
+        num_vehicles = len(individual)
+        split_size = len(fixed_clients) // num_vehicles
+        split_routes = [
+            fixed_clients[i * split_size:(i + 1) * split_size]
+            for i in range(num_vehicles)
+        ]
+
+        # 最後の車両に余りを追加
+        remainder = len(fixed_clients) % num_vehicles
+        if remainder > 0:
+            split_routes[-1].extend(fixed_clients[-remainder:])
+
+        # 避難所を再配置
+        fixed_individual = [self._add_shelters_to_route(route) for route in split_routes]
+        return fixed_individual
+
+    def _add_shelters_to_route(self, clients):
+        """
+        要支援者のリストにキャパを考慮して避難所を追加。
+        """
+        route = [0]  # デポから開始
+        current_load = 0
+
+        for client in clients:
+            client_demand = self.d[client]
+
+            if current_load + client_demand <= max(self.Q.values()):
+                # キャパ内なら要支援者を追加
+                route.append(client)
+                current_load += client_demand
+            else:
+                # キャパ超過直前に最も近い避難所を追加
+                last_client = route[-1]
+                nearest_shelter = min(self.H, key=lambda shelter: self.c[last_client][shelter])
+                route.append(nearest_shelter)
+                route.append(client)
+                current_load = client_demand  # キャパリセット
+
+        # 最後に避難所を追加してデポに戻る
+        if route[-1] not in self.H:
+            last_client = route[-1]
+            nearest_shelter = min(self.H, key=lambda shelter: self.c[last_client][shelter])
+            route.append(nearest_shelter)
+        route.append(0)  # デポに戻る
+
+        return route
 
     def mutate(self, individual, mutation_rate=0.1):
         """
-        突然変異: ランダムな部分区間を逆順にする。
+        要支援者だけを対象に突然変異を実施し、後から避難所を追加。
         :param individual: 個体 (リスト: 各車両のルート)
         :param mutation_rate: 突然変異率
         """
         for route_index, route in enumerate(individual):
-            # ルートがリストでない場合、自動修正またはエラーを記録
-            if not isinstance(route, list):
-                print(f"警告: 予期しないデータ型 {type(route)} が発見されました。修正を試みます。")
-                #individual[route_index] = [0, route, 0] if isinstance(route, int) else [0, 0]
-                #route = individual[route_index]
+            # 要支援者ノードを抽出
+            clients = [node for node in route if node in self.V]
 
-            # 短いルートでは突然変異をスキップ
-            if len(route) <= 3:
+            # 短いリストでは突然変異をスキップ
+            if len(clients) <= 1:
                 continue
 
+            # 突然変異を実行するかの判定
             if random.random() < mutation_rate:
                 # ランダムな部分区間を逆順にする
-                i, j = sorted(random.sample(range(1, len(route) - 1), 2))
-                route[i:j] = reversed(route[i:j])
+                i, j = sorted(random.sample(range(len(clients)), 2))
+                clients[i:j] = reversed(clients[i:j])
 
+            # キャパシティを考慮して避難所を再配置
+            individual[route_index] = self._add_shelters_to_route(clients)
 
     def create_next_generation(self, population):
         """
@@ -218,43 +362,47 @@ class CVRP_Calculation:
         :param population: 現世代の集団 (リスト)
         :return: 次世代の集団 (リスト)
         """
-        # 適応度を計算
+        # 現世代の適応度を計算
         fitness_values = [self.evaluate_individual(ind) for ind in population]
 
-        # エリート個体を保存 (最良個体)
+        # エリート個体を保存（最良個体）
         best_individual = copy.deepcopy(population[np.argmin(fitness_values)])
         best_fitness = min(fitness_values)
 
-        # 次世代集団を構築
-        next_generation = []
+        # 次世代の初期化（エリート保存）
+        next_generation = [best_individual]
+        #print(f"エリート個体（適応度: {best_fitness}）が次世代に追加されました。")
 
-        # エリート個体を次世代に追加
-        next_generation.append(best_individual)
-
-        # 親選択、交叉、突然変異を繰り返して新しい個体を生成
         while len(next_generation) < self.population_size:
-            # 親選択
+            # 親個体を選択
             parent1 = self.select_parents(population, fitness_values)
             parent2 = self.select_parents(population, fitness_values)
 
-            # 交叉
+            # 交叉の実施
             if random.random() < self.crossover_rate:
                 child1, child2 = self.crossover(parent1, parent2)
             else:
                 child1, child2 = parent1[:], parent2[:]
 
-            # 突然変異
+            # 突然変異の適用
             self.mutate(child1, self.mutation_rate)
             self.mutate(child2, self.mutation_rate)
 
-            # 制約確認を追加
-            if self.check_constraints(child1) and len(next_generation) < self.population_size:
+            # 子個体を次世代に追加（制約を満たす場合）
+            if self.check_constraints(child1):
                 next_generation.append(child1)
-            if self.check_constraints(child2) and len(next_generation) < self.population_size:
+            else:
+                print("Constraint failed for child1. Generating new individual.")
+                next_generation.append(self.generate_initial_population()[0])  # 新規作成
+
+            if len(next_generation) < self.population_size and self.check_constraints(child2):
                 next_generation.append(child2)
+            elif len(next_generation) < self.population_size:
+                print("Constraint failed for child2. Generating new individual.")
+                next_generation.append(self.generate_initial_population()[0])  # 新規作成
 
+        # 次世代を返す（集団サイズを調整）
         return next_generation[:self.population_size]
-
 
     def run_genetic_algorithm(self, max_generations, output_csv='./result/genetic_results.csv', best_individual_csv='./result/best_individual.csv'):
         """
@@ -264,7 +412,7 @@ class CVRP_Calculation:
         :return: 全世代を通じての最良個体とその適合度
         """
         # 初期集団生成
-        population = self.generate_initial_population()
+        population = self.generate_initial_population(self.population_size)
 
         # CSVデータの準備
         results = []

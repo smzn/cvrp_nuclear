@@ -43,16 +43,10 @@ print(f"移動コスト行列のサイズ: {calculation.c.shape}")
 
 
 # 初期集団を生成
-population = calculation.generate_initial_population()
+population = calculation.generate_initial_population(population_size)
 
 # 遺伝アルゴリズムの実行
 best_individual, best_fitness = calculation.run_genetic_algorithm(generations)
-
-# 結果の表示
-print(f"\n全世代を通じての最良適合度: {best_fitness}")
-print("最良個体:")
-for route in best_individual:
-    print(f"  ルート: {route}")
 
 
 '''
@@ -72,56 +66,50 @@ print("\nサンプル個体のルート:")
 for route in population[0]:
     print(f"  ルート: {route}")
 
-# 適応度リストを生成 (サンプル)
+# 適応度を計算
+print("\n適応度を計算中...")
 fitness_values = [calculation.evaluate_individual(ind) for ind in population]
+for idx, fitness in enumerate(fitness_values):
+    print(f"個体 {idx + 1} の適応度: {fitness}")
 
-# トーナメント選択のテスト
-parent1 = calculation.select_parents(population, fitness_values)
-parent2 = calculation.select_parents(population, fitness_values)
+# 選択関数をテスト
+print("\nトーナメント選択テスト:")
+k = 3  # トーナメントサイズ
+selected_parent = calculation.select_parents(population, fitness_values, k=k)
+print(f"選択された親個体（k={k}）: {selected_parent}")
 
-print("親個体1:")
-for route in parent1:
-    print(f"  ルート: {route}")
+# 親個体を選択
+print("\n親個体の選択中...")
+parent1 = calculation.select_parents(population, fitness_values, k=3)
+parent2 = calculation.select_parents(population, fitness_values, k=3)
+print(f"親個体 1: {parent1}")
+print(f"親個体 2: {parent2}")
 
-print("\n親個体2:")
-for route in parent2:
-    print(f"  ルート: {route}")
-
-# サンプル親個体
-parent1 = population[0][0]  # 最初の個体のルート1
-parent2 = population[1][0]  # 2番目の個体のルート1
-
-# 交叉のテスト
+# 交叉を実行
+print("\n交叉を実行中...")
 child1, child2 = calculation.crossover(parent1, parent2)
-print("\n親個体1:", parent1)
-print("親個体2:", parent2)
-print("子個体1:", child1)
-print("子個体2:", child2)
+print(f"子個体 1: {child1}")
+print(f"子個体 2: {child2}")
 
-# サンプル個体
-individual = population[0]  # 最初の個体
+# 子個体の適応度を確認
+print("\n子個体の適応度を計算中...")
+fitness_child1 = calculation.evaluate_individual(child1)
+fitness_child2 = calculation.evaluate_individual(child2)
+print(f"子個体 1 の適応度: {fitness_child1}")
+print(f"子個体 2 の適応度: {fitness_child2}")
 
-# 突然変異のテスト
-print("\n突然変異前:")
-for route in individual:
-    print(f"  ルート: {route}")
+# 突然変異の適用
+print("\n突然変異を適用中...")
+mutated_population = []
+for idx, individual in enumerate(population):
+    print(f"\n個体 {idx + 1} の突然変異前: {individual}")
+    calculation.mutate(individual, mutation_rate=0.1)  # 突然変異率10%
+    print(f"個体 {idx + 1} の突然変異後: {individual}")
+    mutated_population.append(individual)
 
-calculation.mutate(individual)
-
-print("\n突然変異後:")
-for route in individual:
-    print(f"  ルート: {route}")
-
-for i, fitness in enumerate(fitness_values):
-    print(f"個体 {i + 1}: 適応度 {fitness}")
-
-# 次世代を作成
-next_population = calculation.create_next_generation(population)
-
-# 次世代の適応度を確認
-print("\n次世代集団の適応度:")
-fitness_values_next = [calculation.evaluate_individual(ind) for ind in next_population]
-for i, fitness in enumerate(fitness_values_next):
-    print(f"個体 {i + 1}: 適応度 {fitness}")
+# 突然変異後の適応度を確認
+print("\n突然変異後の適応度を計算中...")
+for idx, individual in enumerate(mutated_population):
+    fitness = calculation.evaluate_individual(individual)
+    print(f"個体 {idx + 1} の適応度: {fitness}")
 '''
-    
