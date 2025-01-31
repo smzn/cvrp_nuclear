@@ -443,18 +443,41 @@ class CVRP_Geography:
 
             # 結果をデータフレームに変換
             travel_times_df = pd.DataFrame(travel_times)
+            all_nodes = list(range(len(nodes_df)))
+            # 行列形式に変換して保存
+            travel_times_df = travel_times_df.set_index(["source_id", "target_id"]).reindex(
+                pd.MultiIndex.from_product([all_nodes, all_nodes], names=["source_id", "target_id"]),
+                fill_value=0
+            ).reset_index()
 
             # 結果をCSVに保存
             travel_times_df.to_csv(output_csv, index=False, encoding="utf-8-sig")
             print(f"移動時間データを {output_csv} に保存しました。")
 
-            # 行列形式に変換して保存
             travel_time_matrix = travel_times_df.pivot(index="source_id", columns="target_id", values="travel_time").fillna(0)
+            print(f"Travel time matrix created with shape: {travel_time_matrix.shape}")
             travel_time_matrix.to_csv(output_matrix_csv, index=True, encoding="utf-8-sig")
             print(f"行列形式の移動時間データを {output_matrix_csv} に保存しました。")
 
         except Exception as e:
             print(f"エラー: {e}")
+
+    def set_vehicle_info(self, num_vehicles, vehicle_capacity, vehicle_file="omaezaki_vehicles.csv"):
+        """
+        車両情報を設定するメソッド
+        :param num_vehicles: 車両の台数
+        :param vehicle_capacity: 各車両の容量
+        :param vehicle_file: 車両情報を保存するCSVファイル名
+        """
+
+        # 車両の生成
+        vehicles = [{"id": i, "capacity": vehicle_capacity} for i in range(num_vehicles)]
+        df_vehicles = pd.DataFrame(vehicles)
+
+        # CSV保存
+        df_vehicles.to_csv(vehicle_file, index=False, columns = ["id", "capacity"])
+
+        return vehicles
 
 
 if __name__ == "__main__":
@@ -510,6 +533,11 @@ if __name__ == "__main__":
     output_matrix_csv = "omaezaki_travel_time_matrix.csv"  # 行列形式の保存先
     # 移動時間の計算と保存(時間がかかる)
     geo.calculate_travel_times(graphml_file, nodes_csv, output_csv, output_matrix_csv)
+
+    #車両情報設定
+    num_vehicles = 10
+    vehicle_capacity = 4
+    geo.set_vehicle_info(num_vehicles, vehicle_capacity)
 
 
 
