@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+    
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_2e55abfa12ab3c3a75821b29c41db9bf {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_2e55abfa12ab3c3a75821b29c41db9bf" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_2e55abfa12ab3c3a75821b29c41db9bf = L.map(
+                "map_2e55abfa12ab3c3a75821b29c41db9bf",
+                {
+                    center: [34.6364927688179, 138.16164503804725],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 13,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_e6b5df2897341b0eb0cc049eeb97da8d = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 20,
+  "maxNativeZoom": 20,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors \u0026copy; \u003ca href=\"https://carto.com/attributions\"\u003eCARTO\u003c/a\u003e",
+  "subdomains": "abcd",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_e6b5df2897341b0eb0cc049eeb97da8d.addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var marker_fd1e76a499193bc259ea60c77a4c23d0 = L.marker(
+                [34.648205, 138.129044],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_8f35c1b6767492ecf0611e2b2201b894 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_fd1e76a499193bc259ea60c77a4c23d0.setIcon(icon_8f35c1b6767492ecf0611e2b2201b894);
+        
+    
+        var popup_cbf4a58d823b4727334bc8bccb29a40e = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_324587a0c12b2df9d3199fab4e09c876 = $(`<div id="html_324587a0c12b2df9d3199fab4e09c876" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 池新田地区センター<br><b>想定収容人数:</b> 498 人<br><b>備考:</b> 方面隊</div>`)[0];
+                popup_cbf4a58d823b4727334bc8bccb29a40e.setContent(html_324587a0c12b2df9d3199fab4e09c876);
+            
+        
+
+        marker_fd1e76a499193bc259ea60c77a4c23d0.bindPopup(popup_cbf4a58d823b4727334bc8bccb29a40e)
+        ;
+
+        
+    
+    
+            var marker_cabbab6e59396722d4768941799e3cab = L.marker(
+                [34.65336, 138.102408],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_b2766033297d361e21ef660acb4fabc7 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_cabbab6e59396722d4768941799e3cab.setIcon(icon_b2766033297d361e21ef660acb4fabc7);
+        
+    
+        var popup_d538915f16f30513a55e1ddf1542c56e = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_f9f5a0c403cb34af25bb6cf69fd7479e = $(`<div id="html_f9f5a0c403cb34af25bb6cf69fd7479e" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 高松地区センター　体育館<br><b>想定収容人数:</b> 227 人<br><b>備考:</b> 方面隊</div>`)[0];
+                popup_d538915f16f30513a55e1ddf1542c56e.setContent(html_f9f5a0c403cb34af25bb6cf69fd7479e);
+            
+        
+
+        marker_cabbab6e59396722d4768941799e3cab.bindPopup(popup_d538915f16f30513a55e1ddf1542c56e)
+        ;
+
+        
+    
+    
+            var marker_4ca33aa1db456988e982da06837660d6 = L.marker(
+                [34.629518, 138.156735],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_332fe84c4cbc86b5d2feb7d536dc10d0 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_4ca33aa1db456988e982da06837660d6.setIcon(icon_332fe84c4cbc86b5d2feb7d536dc10d0);
+        
+    
+        var popup_f855a5f1955a3f10ea85a5894835f9e6 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_6753e7a2b2f229146fa382f94ec1d552 = $(`<div id="html_6753e7a2b2f229146fa382f94ec1d552" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 佐倉地区センター<br><b>想定収容人数:</b> 488 人<br><b>備考:</b> 方面隊</div>`)[0];
+                popup_f855a5f1955a3f10ea85a5894835f9e6.setContent(html_6753e7a2b2f229146fa382f94ec1d552);
+            
+        
+
+        marker_4ca33aa1db456988e982da06837660d6.bindPopup(popup_f855a5f1955a3f10ea85a5894835f9e6)
+        ;
+
+        
+    
+    
+            var marker_be8c0c002c23018260304608788ad008 = L.marker(
+                [34.654394, 138.165661],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_5ff02f4ceb2e2e4ec409bfe80e5af5c7 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_be8c0c002c23018260304608788ad008.setIcon(icon_5ff02f4ceb2e2e4ec409bfe80e5af5c7);
+        
+    
+        var popup_960ab2d731945387d481d3be7fe0b507 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_75ade26de5ea292bb412d0e1dbc211e3 = $(`<div id="html_75ade26de5ea292bb412d0e1dbc211e3" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 比木地区センター　体育館<br><b>想定収容人数:</b> 378 人<br><b>備考:</b> 方面隊</div>`)[0];
+                popup_960ab2d731945387d481d3be7fe0b507.setContent(html_75ade26de5ea292bb412d0e1dbc211e3);
+            
+        
+
+        marker_be8c0c002c23018260304608788ad008.bindPopup(popup_960ab2d731945387d481d3be7fe0b507)
+        ;
+
+        
+    
+    
+            var marker_64dc17f644235e4e2c27a48af66a8031 = L.marker(
+                [34.667689, 138.147028],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_6d3bcdf09acab83da49c02177622ffaa = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_64dc17f644235e4e2c27a48af66a8031.setIcon(icon_6d3bcdf09acab83da49c02177622ffaa);
+        
+    
+        var popup_d091a31cfdfeb7819e67f773f20b2ac0 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_0e2d8247622b41b284f68b7cba7368e1 = $(`<div id="html_0e2d8247622b41b284f68b7cba7368e1" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 朝比奈地区センター　体育館<br><b>想定収容人数:</b> 364 人<br><b>備考:</b> 方面隊</div>`)[0];
+                popup_d091a31cfdfeb7819e67f773f20b2ac0.setContent(html_0e2d8247622b41b284f68b7cba7368e1);
+            
+        
+
+        marker_64dc17f644235e4e2c27a48af66a8031.bindPopup(popup_d091a31cfdfeb7819e67f773f20b2ac0)
+        ;
+
+        
+    
+    
+            var marker_442b85bd6c3b38e010c980b216b7243c = L.marker(
+                [34.672153, 138.118556],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_251d999e18734e8a3b515256e023c096 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_442b85bd6c3b38e010c980b216b7243c.setIcon(icon_251d999e18734e8a3b515256e023c096);
+        
+    
+        var popup_e44c091a664ed86503b76c5125331870 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_74461e9fdcabea04381c79e3867c6dcc = $(`<div id="html_74461e9fdcabea04381c79e3867c6dcc" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 新野地区センター　体育館<br><b>想定収容人数:</b> 265 人<br><b>備考:</b> 方面隊</div>`)[0];
+                popup_e44c091a664ed86503b76c5125331870.setContent(html_74461e9fdcabea04381c79e3867c6dcc);
+            
+        
+
+        marker_442b85bd6c3b38e010c980b216b7243c.bindPopup(popup_e44c091a664ed86503b76c5125331870)
+        ;
+
+        
+    
+    
+            var marker_6f2f6d420f712831794a0362d323431a = L.marker(
+                [34.61125, 138.205892],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_d04eb5be90d5069254604fe752982b64 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_6f2f6d420f712831794a0362d323431a.setIcon(icon_d04eb5be90d5069254604fe752982b64);
+        
+    
+        var popup_9af9d4386c8438a65f790b3528b6e480 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_c82682712d906f27854d494d8e42cb64 = $(`<div id="html_c82682712d906f27854d494d8e42cb64" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 御前崎地区センター<br><b>想定収容人数:</b> 903 人<br><b>備考:</b> 方面隊</div>`)[0];
+                popup_9af9d4386c8438a65f790b3528b6e480.setContent(html_c82682712d906f27854d494d8e42cb64);
+            
+        
+
+        marker_6f2f6d420f712831794a0362d323431a.bindPopup(popup_9af9d4386c8438a65f790b3528b6e480)
+        ;
+
+        
+    
+    
+            var marker_42e789c2989bfaabbcccfad9810c41ab = L.marker(
+                [34.652174, 138.120393],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_8fdeb686e316fc93abcb402157f971c7 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_42e789c2989bfaabbcccfad9810c41ab.setIcon(icon_8fdeb686e316fc93abcb402157f971c7);
+        
+    
+        var popup_f06697b91d729f26d72cc27b681f0f60 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e90eeafbe86abea5b93dc46ed537edb2 = $(`<div id="html_e90eeafbe86abea5b93dc46ed537edb2" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 御前崎第一小学校　体育館<br><b>想定収容人数:</b> 350 人<br><b>備考:</b> 避難所は体育館</div>`)[0];
+                popup_f06697b91d729f26d72cc27b681f0f60.setContent(html_e90eeafbe86abea5b93dc46ed537edb2);
+            
+        
+
+        marker_42e789c2989bfaabbcccfad9810c41ab.bindPopup(popup_f06697b91d729f26d72cc27b681f0f60)
+        ;
+
+        
+    
+    
+            var marker_ac4a5a0544347396298cf95722dfc0be = L.marker(
+                [34.635867, 138.159344],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_4d165efbb65659882d097566c1d7804b = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_ac4a5a0544347396298cf95722dfc0be.setIcon(icon_4d165efbb65659882d097566c1d7804b);
+        
+    
+        var popup_9d0641b46a543bd2c9903663151cc169 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_8189651310ed4068eed8c98eb103c324 = $(`<div id="html_8189651310ed4068eed8c98eb103c324" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 浜岡東小学校　体育館<br><b>想定収容人数:</b> 285 人<br><b>備考:</b> 避難所は体育館</div>`)[0];
+                popup_9d0641b46a543bd2c9903663151cc169.setContent(html_8189651310ed4068eed8c98eb103c324);
+            
+        
+
+        marker_ac4a5a0544347396298cf95722dfc0be.bindPopup(popup_9d0641b46a543bd2c9903663151cc169)
+        ;
+
+        
+    
+    
+            var marker_198a75bf060ae5066d3ab6a13cfe612d = L.marker(
+                [34.669248, 138.134234],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_c67ed63a8c5e69d4096f24a0801c1ad0 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_198a75bf060ae5066d3ab6a13cfe612d.setIcon(icon_c67ed63a8c5e69d4096f24a0801c1ad0);
+        
+    
+        var popup_fd20f25f4b7fc5c285d6e594b50e26db = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_f894c7c2d50c01f2f9456a7f04665a30 = $(`<div id="html_f894c7c2d50c01f2f9456a7f04665a30" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 浜岡北小学校　体育館<br><b>想定収容人数:</b> 293 人<br><b>備考:</b> 避難所は体育館</div>`)[0];
+                popup_fd20f25f4b7fc5c285d6e594b50e26db.setContent(html_f894c7c2d50c01f2f9456a7f04665a30);
+            
+        
+
+        marker_198a75bf060ae5066d3ab6a13cfe612d.bindPopup(popup_fd20f25f4b7fc5c285d6e594b50e26db)
+        ;
+
+        
+    
+    
+            var marker_290ac879d1fbec1310d45b5eb711d149 = L.marker(
+                [34.604265, 138.216186],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_42a9af6067652b891861bc0f6789a7d4 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_290ac879d1fbec1310d45b5eb711d149.setIcon(icon_42a9af6067652b891861bc0f6789a7d4);
+        
+    
+        var popup_c0e3c7ccdd3495f9e557eee96c0d6594 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_cebd3ecd040d10dd89c1ea2509e6f29c = $(`<div id="html_cebd3ecd040d10dd89c1ea2509e6f29c" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 御前崎小学校　体育館<br><b>想定収容人数:</b> 378 人<br><b>備考:</b> 避難所は体育館</div>`)[0];
+                popup_c0e3c7ccdd3495f9e557eee96c0d6594.setContent(html_cebd3ecd040d10dd89c1ea2509e6f29c);
+            
+        
+
+        marker_290ac879d1fbec1310d45b5eb711d149.bindPopup(popup_c0e3c7ccdd3495f9e557eee96c0d6594)
+        ;
+
+        
+    
+    
+            var marker_34d05933e6f06050bd2e7f27eaafd691 = L.marker(
+                [34.611171, 138.189884],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_2e5d75143dc46939cef6e605906a7019 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_34d05933e6f06050bd2e7f27eaafd691.setIcon(icon_2e5d75143dc46939cef6e605906a7019);
+        
+    
+        var popup_65376b1e116598122fb890716bfff43b = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_7f6de9bf3b9a330d7a766c242db080cc = $(`<div id="html_7f6de9bf3b9a330d7a766c242db080cc" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 白羽小学校　体育館<br><b>想定収容人数:</b> 407 人<br><b>備考:</b> 避難所は体育館</div>`)[0];
+                popup_65376b1e116598122fb890716bfff43b.setContent(html_7f6de9bf3b9a330d7a766c242db080cc);
+            
+        
+
+        marker_34d05933e6f06050bd2e7f27eaafd691.bindPopup(popup_65376b1e116598122fb890716bfff43b)
+        ;
+
+        
+    
+    
+            var marker_40e03ef4178e9c52e5b202f1315728aa = L.marker(
+                [34.64339, 138.128797],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_7c6710e6cc26237799815110562d084e = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_40e03ef4178e9c52e5b202f1315728aa.setIcon(icon_7c6710e6cc26237799815110562d084e);
+        
+    
+        var popup_80c7bbf199e4d19df03a402e16552c4f = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_86f04077e7b337cf37049ccd4207d8de = $(`<div id="html_86f04077e7b337cf37049ccd4207d8de" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 浜岡中学校　体育館<br><b>想定収容人数:</b> 1169 人<br><b>備考:</b> 避難所は体育館</div>`)[0];
+                popup_80c7bbf199e4d19df03a402e16552c4f.setContent(html_86f04077e7b337cf37049ccd4207d8de);
+            
+        
+
+        marker_40e03ef4178e9c52e5b202f1315728aa.bindPopup(popup_80c7bbf199e4d19df03a402e16552c4f)
+        ;
+
+        
+    
+    
+            var marker_ce25b140f500abeed70e021d4ab1b38f = L.marker(
+                [34.650817, 138.127107],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_1c062b50add361c692ff446b961a9935 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_ce25b140f500abeed70e021d4ab1b38f.setIcon(icon_1c062b50add361c692ff446b961a9935);
+        
+    
+        var popup_62ea391dbabd0db81b28ae2d0dfc7087 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_7d583620fb7cd9f908e2e088475bedc3 = $(`<div id="html_7d583620fb7cd9f908e2e088475bedc3" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 池新田高等学校　体育館<br><b>想定収容人数:</b> 1003 人<br><b>備考:</b> 静岡県有施設</div>`)[0];
+                popup_62ea391dbabd0db81b28ae2d0dfc7087.setContent(html_7d583620fb7cd9f908e2e088475bedc3);
+            
+        
+
+        marker_ce25b140f500abeed70e021d4ab1b38f.bindPopup(popup_62ea391dbabd0db81b28ae2d0dfc7087)
+        ;
+
+        
+    
+    
+            var marker_258e9348212f97cf8bd1b252b039c666 = L.marker(
+                [34.6387, 138.131],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_290f3829120252deb88e3cd99235c9b5 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_258e9348212f97cf8bd1b252b039c666.setIcon(icon_290f3829120252deb88e3cd99235c9b5);
+        
+    
+        var popup_e82b2230d25c8ec366a94c8b4e2ab59c = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_2d9d95a1927735f5fd9e92b1bcb75090 = $(`<div id="html_2d9d95a1927735f5fd9e92b1bcb75090" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> はまおか幼稚園<br><b>想定収容人数:</b> 629 人<br><b>備考:</b> 遊戯室を災害状況により開設</div>`)[0];
+                popup_e82b2230d25c8ec366a94c8b4e2ab59c.setContent(html_2d9d95a1927735f5fd9e92b1bcb75090);
+            
+        
+
+        marker_258e9348212f97cf8bd1b252b039c666.bindPopup(popup_e82b2230d25c8ec366a94c8b4e2ab59c)
+        ;
+
+        
+    
+    
+            var marker_9db7eb4a08ada5a1caf9580f72812e36 = L.marker(
+                [34.634554, 138.155555],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_9f9084556d836965aee540d0a9004b5d = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_9db7eb4a08ada5a1caf9580f72812e36.setIcon(icon_9f9084556d836965aee540d0a9004b5d);
+        
+    
+        var popup_268ca2eb79579f435c97a1eeaaef00fb = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_7942122004138b45ca1f0a0ae55215cf = $(`<div id="html_7942122004138b45ca1f0a0ae55215cf" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> さくらこども園<br><b>想定収容人数:</b> 1104 人<br><b>備考:</b> 遊戯室を災害状況により開設</div>`)[0];
+                popup_268ca2eb79579f435c97a1eeaaef00fb.setContent(html_7942122004138b45ca1f0a0ae55215cf);
+            
+        
+
+        marker_9db7eb4a08ada5a1caf9580f72812e36.bindPopup(popup_268ca2eb79579f435c97a1eeaaef00fb)
+        ;
+
+        
+    
+    
+            var marker_1c35373ce0816a971a196d942c581f5b = L.marker(
+                [34.6695, 138.148],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_8f7e96be02f52acda6c22b1deafb46a7 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_1c35373ce0816a971a196d942c581f5b.setIcon(icon_8f7e96be02f52acda6c22b1deafb46a7);
+        
+    
+        var popup_f91644cea3b10388f68098c5e709efd8 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_0b6cbe4854d902440ff36423ad107339 = $(`<div id="html_0b6cbe4854d902440ff36423ad107339" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 北こども園<br><b>想定収容人数:</b> 353 人<br><b>備考:</b> 遊戯室を災害状況により開設</div>`)[0];
+                popup_f91644cea3b10388f68098c5e709efd8.setContent(html_0b6cbe4854d902440ff36423ad107339);
+            
+        
+
+        marker_1c35373ce0816a971a196d942c581f5b.bindPopup(popup_f91644cea3b10388f68098c5e709efd8)
+        ;
+
+        
+    
+    
+            var marker_994860965410d3b30be1e6cf6854012d = L.marker(
+                [34.604173, 138.213801],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_fd9fbf2e37a5ea9b4d37e273c495b5b8 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_994860965410d3b30be1e6cf6854012d.setIcon(icon_fd9fbf2e37a5ea9b4d37e273c495b5b8);
+        
+    
+        var popup_1dc579e96710f11f5158bbb47dc2b308 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_0e85d46825023f19d282d4ebb034b9db = $(`<div id="html_0e85d46825023f19d282d4ebb034b9db" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 御前崎こども園　幼児棟<br><b>想定収容人数:</b> 353 人<br><b>備考:</b> 遊戯室を災害状況により開設</div>`)[0];
+                popup_1dc579e96710f11f5158bbb47dc2b308.setContent(html_0e85d46825023f19d282d4ebb034b9db);
+            
+        
+
+        marker_994860965410d3b30be1e6cf6854012d.bindPopup(popup_1dc579e96710f11f5158bbb47dc2b308)
+        ;
+
+        
+    
+    
+            var marker_bd450c2f27d2a4df9a682cc192369cf5 = L.marker(
+                [34.600718, 138.223],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_c62cb8800f9934a035b4ef9db07b4517 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_bd450c2f27d2a4df9a682cc192369cf5.setIcon(icon_c62cb8800f9934a035b4ef9db07b4517);
+        
+    
+        var popup_50db94f06a9e1ce374bec922991399b4 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_7cf5c9da99d7fb5d88df9f2f9b9147b9 = $(`<div id="html_7cf5c9da99d7fb5d88df9f2f9b9147b9" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 社会福祉法人　御前崎厚生会　灯光園<br><b>想定収容人数:</b> 0 人<br><b>備考:</b> 福祉避難所</div>`)[0];
+                popup_50db94f06a9e1ce374bec922991399b4.setContent(html_7cf5c9da99d7fb5d88df9f2f9b9147b9);
+            
+        
+
+        marker_bd450c2f27d2a4df9a682cc192369cf5.bindPopup(popup_50db94f06a9e1ce374bec922991399b4)
+        ;
+
+        
+    
+    
+            var marker_2a79c8eafa0ca74189c494f3725ea134 = L.marker(
+                [34.641854, 138.131523],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_b4f9edd38b279ddfe471212e5e0d9e1f = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_2a79c8eafa0ca74189c494f3725ea134.setIcon(icon_b4f9edd38b279ddfe471212e5e0d9e1f);
+        
+    
+        var popup_f9c9c4c84c0b919c0ed7d23d9a9a129d = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_79bc4e82ab2cc14cb14049fe44c1de57 = $(`<div id="html_79bc4e82ab2cc14cb14049fe44c1de57" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 社会福祉法人　賛育会　東海清風園<br><b>想定収容人数:</b> 0 人<br><b>備考:</b> 福祉避難所</div>`)[0];
+                popup_f9c9c4c84c0b919c0ed7d23d9a9a129d.setContent(html_79bc4e82ab2cc14cb14049fe44c1de57);
+            
+        
+
+        marker_2a79c8eafa0ca74189c494f3725ea134.bindPopup(popup_f9c9c4c84c0b919c0ed7d23d9a9a129d)
+        ;
+
+        
+    
+    
+            var marker_fe8fceace5c51bcf20d0eeb24a3f6ba3 = L.marker(
+                [34.611877, 138.204225],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_493daea7a2b54132b5828d7f49bc36f5 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_fe8fceace5c51bcf20d0eeb24a3f6ba3.setIcon(icon_493daea7a2b54132b5828d7f49bc36f5);
+        
+    
+        var popup_2a0c33a97342487783a42fd83d0b4b85 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_5f1906e709c8f53fc3f3b330dbfeda72 = $(`<div id="html_5f1906e709c8f53fc3f3b330dbfeda72" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 御前崎ふれあい福祉センター（なごみ）<br><b>想定収容人数:</b> 0 人<br><b>備考:</b> 福祉避難所</div>`)[0];
+                popup_2a0c33a97342487783a42fd83d0b4b85.setContent(html_5f1906e709c8f53fc3f3b330dbfeda72);
+            
+        
+
+        marker_fe8fceace5c51bcf20d0eeb24a3f6ba3.bindPopup(popup_2a0c33a97342487783a42fd83d0b4b85)
+        ;
+
+        
+    
+    
+            var marker_cbc761bf50161408008b08ae2fa44039 = L.marker(
+                [34.640782, 138.119938],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_27ac033db4e4101aa5a064ec22b5376a = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_cbc761bf50161408008b08ae2fa44039.setIcon(icon_27ac033db4e4101aa5a064ec22b5376a);
+        
+    
+        var popup_0887b946ec0a78f731da5f807e24dcd7 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_6f91269a210fb1f9bc73a331ffa2b08a = $(`<div id="html_6f91269a210fb1f9bc73a331ffa2b08a" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> グループホーム　風音A棟<br><b>想定収容人数:</b> 0 人<br><b>備考:</b> 福祉避難所</div>`)[0];
+                popup_0887b946ec0a78f731da5f807e24dcd7.setContent(html_6f91269a210fb1f9bc73a331ffa2b08a);
+            
+        
+
+        marker_cbc761bf50161408008b08ae2fa44039.bindPopup(popup_0887b946ec0a78f731da5f807e24dcd7)
+        ;
+
+        
+    
+    
+            var marker_bcc99ebced882fcd8459be3d0f3ddc39 = L.marker(
+                [34.637984, 138.128125],
+                {
+}
+            ).addTo(map_2e55abfa12ab3c3a75821b29c41db9bf);
+        
+    
+            var icon_e281efbd73a9a15d53fc4559c72bddf3 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_bcc99ebced882fcd8459be3d0f3ddc39.setIcon(icon_e281efbd73a9a15d53fc4559c72bddf3);
+        
+    
+        var popup_04404a17c7cd69b6406d03d665706973 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_32f3910e6cbc6ab0fdff20f2bcefe4ad = $(`<div id="html_32f3910e6cbc6ab0fdff20f2bcefe4ad" style="width: 100.0%; height: 100.0%;"><b>避難所:</b> 御前崎市役所<br><b>想定収容人数:</b> 0 人<br><b>備考:</b> 市役所</div>`)[0];
+                popup_04404a17c7cd69b6406d03d665706973.setContent(html_32f3910e6cbc6ab0fdff20f2bcefe4ad);
+            
+        
+
+        marker_bcc99ebced882fcd8459be3d0f3ddc39.bindPopup(popup_04404a17c7cd69b6406d03d665706973)
+        ;
+
+        
+    
+</script>
+</html>
